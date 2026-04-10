@@ -10,14 +10,14 @@ FORECAST_MODEL = "atmos"
 FILE_TYPE = "pgrb2"
 GRID_RESOLUTION = "0p25"
 
-"""
-Downloads a file from the GFS AWS S3 bucket.
+def download_file(forecast_date, forecast_cycle, forecast_hour, verbose=False):
+    """
+    Downloads a file from the GFS AWS S3 bucket.
 
-forecast_date: The model run date in YYYYMMDD format
-forecast_cycle: Which model run (00, 06, 12, 18)
-forecast_hour: Pretty self-explanatory (in XXX format)
-"""
-def download_file(forecast_date, forecast_cycle, forecast_hour):
+    forecast_date: The model run date in YYYYMMDD format
+    forecast_cycle: Which model run (00, 06, 12, 18)
+    forecast_hour: Pretty self-explanatory (in XXX format)
+    """
     s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
 
     object_key = f"gfs.t{forecast_cycle}z.{FILE_TYPE}.{GRID_RESOLUTION}.f{forecast_hour}"
@@ -33,13 +33,15 @@ def download_file(forecast_date, forecast_cycle, forecast_hour):
 
         # Print common prefixes (subfolders)
         if 'CommonPrefixes' in response:
-            for prefix in response['CommonPrefixes']:
-                print(prefix['Prefix'])
+            if verbose:
+                for prefix in response['CommonPrefixes']:
+                    print(prefix['Prefix'])
 
         # Print object keys
         if 'Contents' in response and response['Contents']:
-            for obj in response['Contents']:
-                print(obj['Key'])
+            if verbose:
+                for obj in response['Contents']:
+                    print(obj['Key'])
         else:
             print("No objects found in the folder.")
     except Exception as e:
