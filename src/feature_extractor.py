@@ -1,3 +1,8 @@
+from pathlib import Path
+
+import xarray as xr
+import pandas as pd
+from IPython.display import display
 import boto3
 from botocore import UNSIGNED
 from botocore.config import Config
@@ -41,8 +46,30 @@ def download_file(forecast_date, forecast_cycle, forecast_hour):
     object_key = f"gfs.t{forecast_cycle}z.{FILE_TYPE}.{GRID_RESOLUTION}.f{forecast_hour}"
 
     remote_object_key = folder + object_key
-    local_file_name = f"{MODEL_DIR}/object_key"
+    local_file_name = f"{MODEL_DIR}/{object_key}"
     s3.download_file(GFS_BUCKET_NAME, remote_object_key, local_file_name)
     print(f"File {object_key} downloaded successfully.")
 
-download_file("20250213", "00", "012")
+sample_date = "20250213"
+sample_cycle = "00"
+sample_hr = "012"
+
+model_filename = f"{MODEL_DIR}/gfs.t{sample_cycle}z.{FILE_TYPE}.{GRID_RESOLUTION}.f{sample_hr}"
+model_file = Path(model_filename)
+if not model_file.is_file():
+    download_file(sample_date, sample_cycle, sample_hr)
+
+ds_500mb = xr.open_dataset(model_filename, engine="cfgrib", filter_by_keys={'typeOfLevel': 'isobaricInhPa', "level": 500, "shortName": "gh"})
+# ds_sfc = xr.open_dataset(model_filename, engine="cfgrib", filter_by_keys={'typeOfLevel': 'surface', "stepType": "instant"})
+ds_sfc = xr.open_dataset(model_filename, engine="cfgrib", filter_by_keys={"shortName": "prmsl"})
+
+variable_rows = []
+for variable in ds_sfc:
+    variable_rows.append({
+        "Variable": variable,
+        "Long Name": ds_sfc[variable].attrs["long_name"],
+        "Units": ds_sfc[variable].attrs["units"]
+    })
+
+variable_df = pd.DataFrame(variable_rows)
+display(variable_df)
