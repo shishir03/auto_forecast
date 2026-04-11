@@ -4,7 +4,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import numpy as np
 
-def plot_500mb_field(ds, var_name=None, title=""):
+def plot_contour_field(ds, var_name=None, title="", cmap='RdYlBu_r'):
     _, ax = plt.subplots(
         figsize=(12, 8),
         subplot_kw={'projection': ccrs.LambertConformal(central_longitude=-95)}
@@ -27,7 +27,7 @@ def plot_500mb_field(ds, var_name=None, title=""):
         lons = ds["lon"].values
 
     cf = ax.contourf(lons, lats, data, levels=20,
-                     transform=ccrs.PlateCarree(), cmap='RdYlBu_r')
+                     transform=ccrs.PlateCarree(), cmap=cmap)
     cs = ax.contour(lons, lats, data, levels=20,
                     transform=ccrs.PlateCarree(), colors='black', linewidths=0.5)
     ax.clabel(cs, inline=True, fontsize=8, fmt='%d')
