@@ -12,26 +12,47 @@ sample_cycle = "00"
 sample_hr = "012"
 
 download_file(sample_date, sample_cycle, sample_hr)
+model_filename = f"{MODEL_DIR}/gfs.t{sample_cycle}z.{FILE_TYPE}.{GRID_RESOLUTION}.f{sample_hr}"
 
-# Try to encompass a good portion of the North Pacific / western North America
-lat_min, lat_max = 10, 60
-lon_min, lon_max = 180, 260
+"""
+Grid sizes are as follows:
 
-def open_xr(filename, filter, lat_min=10, lat_max=60, lon_min=180, lon_max=260):
+1. Big grid (for synoptic-scale patterns)
+2. Medium grid (smaller but still synoptic-scale, for coarse-resolution wind data / PWATs)
+3. Small grid (for hi-res observations like temperature / precipitation)
+"""
+grid_sizes = [(10, 60, 180, 260), (25, 50, 225, 255), (36, 38.5, 236, 239)]
+
+def open_xr(filter, filename=model_filename, grid=0):
+    lat_min, lat_max, lon_min, lon_max = grid_sizes[grid]
     return xr.open_dataset(filename, engine="cfgrib", filter_by_keys=filter) \
             .sel(latitude=slice(lat_max, lat_min), longitude=slice(lon_min, lon_max))
 
-model_filename = f"{MODEL_DIR}/gfs.t{sample_cycle}z.{FILE_TYPE}.{GRID_RESOLUTION}.f{sample_hr}"
+# Big grids
+ds_z500 = open_xr({'typeOfLevel': 'isobaricInhPa', "level": 500, "shortName": "gh"})
+ds_mslp = open_xr({"shortName": "prmsl"}) / 100
+ds_u250 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 250, "shortName": "u"})
+ds_v250 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 250, "shortName": "v"})
 
-ds_z500 = open_xr(model_filename, {'typeOfLevel': 'isobaricInhPa', "level": 500, "shortName": "gh"})
-ds_sfc = open_xr(model_filename, {"typeOfLevel": "surface", "shortName": "t"})
-ds_mslp = open_xr(model_filename, {"shortName": "prmsl"}) / 100
-ds_u250 = open_xr(model_filename, {"typeOfLevel": "isobaricInhPa", "level": 250, "shortName": "u"})
-ds_v250 = open_xr(model_filename, {"typeOfLevel": "isobaricInhPa", "level": 250, "shortName": "v"})
+# Medium grids
+ds_u500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "u"}, grid=1)
+ds_v500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "v"}, grid=1)
+ds_u850 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 850, "shortName": "u"}, grid=1)
+ds_v850 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 850, "shortName": "v"}, grid=1)
+ds_usfc = open_xr({"typeOfLevel": "surface", "shortName": "10u"}, grid=1)
+ds_vsfc = open_xr({"typeOfLevel": "surface", "shortName": "10v"}, grid=1)
+ds_pwat = open_xr({"shortName": "pwat"}, grid=1)
+
+# Small grids
+ds_t500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "t"}, grid=2)
+ds_t850 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 850, "shortName": "t"}, grid=2)
+ds_tsfc = open_xr({"typeOfLevel": "surface", "shortName": "t"}, grid=2)
+ds_cwat = open_xr({"shortName": "cwat"}, grid=2)
+ds_prate = open_xr({"shortName": "prate"}, grid=2)
 
 # plotter.plot_contour_field(ds_wind250, title="250mb wind")
 # plotter.plot_contour_field(ds_mslp, var_name="prmsl", title="MSLP", cmap="RdBu_r")
-
+lat_min, lat_max, lon_min, lon_max = grid_sizes[0]
 z500_climo = xr.open_dataset(f"{MODEL_DIR}/hgt.mon.ltm.1991-2020.nc").sel(
     lat=slice(lat_max, lat_min), 
     lon=slice(lon_min, lon_max),
@@ -54,6 +75,9 @@ def get_z500_laplacian(ds_z500):
     return laplacian
 
 def get_sfc_features(ds_mslp, neighborhood_size=10, min_depth=2.0):
+    """
+    Determine high or low pressure centers from an MSLP field
+    """
     lats = ds_mslp["latitude"].values
     lons = ds_mslp["longitude"].values
 
@@ -86,14 +110,17 @@ def get_sfc_features(ds_mslp, neighborhood_size=10, min_depth=2.0):
 
     return lows, highs
 
-def get_jet_path(ds_u250, ds_v250, jet_threshold=30, spacing_deg=5.0):
-    u_vals = ds_u250["u"].values
-    v_vals = ds_v250["v"].values
+def get_wind_vectors(ds_u, ds_v, jet_threshold=30, spacing_deg=5.0):
+    """
+    Get spaced out wind vectors within the "core" of the jet (250mb winds above the given threshold)
+    """
+    u_vals = ds_u["u"].values
+    v_vals = ds_v["v"].values
     ds_wind250 = mpcalc.wind_speed(u_vals * units("m/s"), v_vals * units("m/s"))
     # ds_wind250 = xr.apply_ufunc(gaussian_filter, ds_wind250, kwargs={'sigma': 3}, dask='parallelized')
 
-    lats = ds_u250["latitude"].values
-    lons = ds_u250["longitude"].values
+    lats = ds_u["latitude"].values
+    lons = ds_u["longitude"].values
     dlat = abs(lats[1] - lats[0])
     dlon = abs(lons[1] - lons[0])
     lat_stride = max(1, int(spacing_deg / dlat))
