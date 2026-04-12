@@ -17,7 +17,7 @@ download_file(sample_date, sample_cycle, sample_hr)
 lat_min, lat_max = 10, 60
 lon_min, lon_max = 180, 260
 
-def open_xr(filename, filter):
+def open_xr(filename, filter, lat_min=10, lat_max=60, lon_min=180, lon_max=260):
     return xr.open_dataset(filename, engine="cfgrib", filter_by_keys=filter) \
             .sel(latitude=slice(lat_max, lat_min), longitude=slice(lon_min, lon_max))
 
@@ -25,7 +25,7 @@ model_filename = f"{MODEL_DIR}/gfs.t{sample_cycle}z.{FILE_TYPE}.{GRID_RESOLUTION
 
 ds_z500 = open_xr(model_filename, {'typeOfLevel': 'isobaricInhPa', "level": 500, "shortName": "gh"})
 ds_sfc = open_xr(model_filename, {"typeOfLevel": "surface", "shortName": "t"})
-ds_mslp = open_xr(model_filename, {"shortName": "prmsl"})
+ds_mslp = open_xr(model_filename, {"shortName": "prmsl"}) / 100
 ds_u250 = open_xr(model_filename, {"typeOfLevel": "isobaricInhPa", "level": 250, "shortName": "u"})
 ds_v250 = open_xr(model_filename, {"typeOfLevel": "isobaricInhPa", "level": 250, "shortName": "v"})
 
@@ -124,7 +124,9 @@ def get_jet_path(ds_u250, ds_v250, jet_threshold=30, spacing_deg=5.0):
 
     return vectors
 
-# print(get_sfc_features(ds_mslp))
-ds_wind250 = mpcalc.wind_speed(ds_u250["u"].metpy.quantify(), ds_v250["v"].metpy.quantify())
+lows, highs = get_sfc_features(ds_mslp)
+plotter.plot_contour_field(ds_mslp, var_name="prmsl", lows=lows, highs=highs, title="MSLP Plot", cmap="RdBu_r")
+
+''' ds_wind250 = mpcalc.wind_speed(ds_u250["u"].metpy.quantify(), ds_v250["v"].metpy.quantify())
 vectors = get_jet_path(ds_u250, ds_v250, spacing_deg=2.5)
-plotter.plot_wind_vectors(ds_wind250, ds_u250["latitude"].values, ds_v250["longitude"].values, vectors)
+plotter.plot_wind_vectors(ds_wind250, ds_u250["latitude"].values, ds_v250["longitude"].values, vectors) '''

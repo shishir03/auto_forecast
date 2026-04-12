@@ -4,7 +4,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import numpy as np
 
-def plot_contour_field(ds, var_name=None, title="", cmap='RdYlBu_r'):
+def plot_contour_field(ds, var_name=None, lows=None, highs=None, title="", cmap='RdYlBu_r'):
     _, ax = plt.subplots(
         figsize=(12, 8),
         subplot_kw={'projection': ccrs.LambertConformal(central_longitude=-95)}
@@ -31,6 +31,22 @@ def plot_contour_field(ds, var_name=None, title="", cmap='RdYlBu_r'):
     cs = ax.contour(lons, lats, data, levels=20,
                     transform=ccrs.PlateCarree(), colors='black', linewidths=0.5)
     ax.clabel(cs, inline=True, fontsize=8, fmt='%d')
+
+    if lows is not None:
+        for low in lows:
+            ax.plot(low['lon'], low['lat'], 'rv',  # red triangle
+                    markersize=8, transform=ccrs.PlateCarree())
+            ax.text(low['lon'], low['lat'] - 1.5, f"L\n{low['mslp']:.0f}",
+                    color='red', fontsize=8, fontweight='bold',
+                    ha='center', transform=ccrs.PlateCarree())
+
+    if highs is not None:
+        for high in highs:
+            ax.plot(high['lon'], high['lat'], 'b^',  # blue triangle
+                    markersize=8, transform=ccrs.PlateCarree())
+            ax.text(high['lon'], high['lat'] - 1.5, f"H\n{high['mslp']:.0f}",
+                    color='blue', fontsize=8, fontweight='bold',
+                    ha='center', transform=ccrs.PlateCarree())
 
     plt.colorbar(cf, ax=ax, orientation='horizontal', pad=0.05, label=var_name)
     ax.set_title(title)
