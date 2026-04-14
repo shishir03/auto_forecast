@@ -7,12 +7,12 @@ from scipy.ndimage import gaussian_filter, minimum_filter, maximum_filter
 import plotter
 from gfs_reader import download_file, FILE_TYPE, GRID_RESOLUTION, MODEL_DIR
 
-sample_date = "20250213"
+sample_date = "20260217"
 sample_cycle = "00"
 sample_hr = "012"
 
 download_file(sample_date, sample_cycle, sample_hr)
-model_filename = f"{MODEL_DIR}/gfs.t{sample_cycle}z.{FILE_TYPE}.{GRID_RESOLUTION}.f{sample_hr}"
+model_filename = f"{MODEL_DIR}/{sample_date}{sample_cycle}{sample_hr}.gfs.t{sample_cycle}z.{FILE_TYPE}.{GRID_RESOLUTION}.f{sample_hr}"
 
 """
 Grid sizes are as follows:
@@ -26,7 +26,7 @@ grid_sizes = [(10, 60, 180, 260), (25, 50, 225, 255), (36, 38.5, 236, 239)]
 def open_xr(filter, filename=model_filename, grid=0):
     lat_min, lat_max, lon_min, lon_max = grid_sizes[grid]
     return xr.open_dataset(filename, engine="cfgrib", filter_by_keys=filter) \
-            .sel(latitude=slice(lat_max, lat_min), longitude=slice(lon_min, lon_max))
+        .sel(latitude=slice(lat_max, lat_min), longitude=slice(lon_min, lon_max))
 
 # Big grids
 ds_z500 = open_xr({'typeOfLevel': 'isobaricInhPa', "level": 500, "shortName": "gh"})
@@ -39,8 +39,8 @@ ds_u500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "u
 ds_v500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "v"}, grid=1)
 ds_u850 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 850, "shortName": "u"}, grid=1)
 ds_v850 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 850, "shortName": "v"}, grid=1)
-ds_usfc = open_xr({"typeOfLevel": "surface", "shortName": "10u"}, grid=1)
-ds_vsfc = open_xr({"typeOfLevel": "surface", "shortName": "10v"}, grid=1)
+ds_usfc = open_xr({"shortName": "10u"}, grid=1)
+ds_vsfc = open_xr({"shortName": "10v"}, grid=1)
 ds_pwat = open_xr({"shortName": "pwat"}, grid=1)
 
 # Small grids
@@ -48,7 +48,7 @@ ds_t500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "t
 ds_t850 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 850, "shortName": "t"}, grid=2)
 ds_tsfc = open_xr({"typeOfLevel": "surface", "shortName": "t"}, grid=2)
 ds_cwat = open_xr({"shortName": "cwat"}, grid=2)
-ds_prate = open_xr({"shortName": "prate"}, grid=2)
+ds_prate = open_xr({"shortName": "prate", "stepType": "avg"}, grid=2)
 
 # plotter.plot_contour_field(ds_wind250, title="250mb wind")
 # plotter.plot_contour_field(ds_mslp, var_name="prmsl", title="MSLP", cmap="RdBu_r")
@@ -64,7 +64,7 @@ z500_climo = xr.open_dataset(f"{MODEL_DIR}/hgt.mon.ltm.1991-2020.nc").sel(
 z500_anom = ds_z500["gh"] - z500_climo["hgt"]
 # plotter.plot_500mb_field(z500_anom, title='500mb Geopotential Height')
 
-# plotter.plot_500mb_field(ds_z500, 'gh', title='500mb Geopotential Height')
+# plotter.plot_contour_field(ds_z500, var_name='gh', title='500mb Geopotential Height')
 
 def get_z500_laplacian(ds_z500):
     ds_z500_crs = ds_z500.metpy.assign_crs(grid_mapping_name='latitude_longitude', earth_radius=6371229.0)

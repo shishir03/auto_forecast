@@ -21,9 +21,10 @@ def download_file(forecast_date, forecast_cycle, forecast_hour, verbose=False):
     s3 = boto3.client('s3', config=Config(signature_version=UNSIGNED))
 
     object_key = f"gfs.t{forecast_cycle}z.{FILE_TYPE}.{GRID_RESOLUTION}.f{forecast_hour}"
-    local_file_name = f"{MODEL_DIR}/{object_key}"
+    local_file_name = f"{MODEL_DIR}/{forecast_date}{forecast_cycle}{forecast_hour}.{object_key}"
     model_file = Path(local_file_name)
     if model_file.is_file():
+        print("File already found")
         return
 
     folder = f"gfs.{forecast_date}/{forecast_cycle}/{FORECAST_MODEL}/"
