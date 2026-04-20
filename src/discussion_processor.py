@@ -1,6 +1,8 @@
 import ollama
+import time
 
 def simplify_discussion(discussion_text):
+    start = time.time()
     extraction_response = ollama.chat(
         model='llama3.1:8b-instruct-q4_K_M',
         messages=[
@@ -45,52 +47,63 @@ def simplify_discussion(discussion_text):
         ]
     )
 
+    end = time.time()
+    print(f"Total time: {end - start}")
     return response['message']['content']
 
 print(simplify_discussion(
 """.SHORT TERM...
-Issued at 1201 PM PDT Sat Apr 18 2026
-(This evening through Sunday)
+Issued at 935 PM PDT Sat Apr 18 2026
+(Tonight through Monday)
 
-High clouds continue to stream in from the west, yet will have very
-little impact on high temperatures this afternoon. We are
-forecasting mid 60s to lower 70s in the northwest facing locations
-and low-to-upper 70s elsewhere. There is a greater than 50%
-probability for Concord, San Jose, Gilroy, Hollister, and King City
-to exceed 80 degrees F on this afternoon (but less than 10% of
-exceeding 85 degrees F).
+Satellite imagery shows high clouds continuing to cover the Bay Area
+and Central Coast tonight, which are expected to continue to push
+through the region in the overnight period before steadily thinning
+and scattering Sunday morning. Low temperatures tonight are expected
+to hover in the middle 40s to lower 50s across the region, perhaps a
+few degrees warmer than the current forecast if the high level cloud
+cover is enough to inhibit radiational cooling and reflect thermal
+energy back to the surface.
 
-Tonight and into Sunday morning, expecting low clouds to return to
-the coast and coastal adjacent valleys as moisture increases ahead
-of an approaching mid/upper level low. This low will also cool
-temperatures slightly as clouds increase, most notability in the
-North Bay and San Francisco Bay Area. Meanwhile, the Central Coast
-will remain quite warm across the interior Sunday afternoon.
+Today will be a day of temperatures close to the seasonal averages,
+with the inland valleys reaching highs in the 70s, the Bays seeing
+highs in the middle 60s to lower 70s, and the Pacific coast hovering
+around the upper 50s to the lower 60s. A gentle onshore breeze with
+a southwesterly component will develop during the afternoon, with
+the breezy winds persisting into the night as a cold front
+approaches the region.
+
+&&
 
 .LONG TERM...
-Issued at 1201 PM PDT Sat Apr 18 2026
-(Sunday night through next Friday)
+Issued at 935 PM PDT Sat Apr 18 2026
+(Monday night through next Saturday)
 
-The progression of the anticipated cold front has slowed down by
-about 12-18 hours. However, we still expect pre-frontal rain showers
-to begin Monday morning across the North Bay and then spread
-southward across the Bay Area. Outside of the coastal ranges of the
-Central Coast, we may see very little rainfall on during the day
-Monday. The main cold front is now expected to move across the Bay
-Area and Central Coast on Tuesday morning. By Tuesday afternoon and
-evening, we have the greatest potential for thunderstorms with up to
-30% across much of the region as up to 500 J/kg of surface based
-CAPE is forecast. We are mostly forecasting this rainfall to be
-beneficial, but urban and poorly drained areas may experience
-flooding concerns during periods of heavy rain showers and/or
-thunderstorms. The WPC has a Marginal Risk of Excessive Rainfall (at
-least 5%) from the Santa Cruz Mountains northward on Day 3 (5 AM
-Monday - 5 AM Tuesday). However, we are not expecting any major
-river flooding with this event.
+The focus of the seven-day outlook continues to be centered around
+the cold front coming through the Bay Area and Central Coast for the
+early part of the work week. Pre-frontal rain showers are expected
+to arrive sometime Monday morning across the North Bay and continue
+to spread southward through the day, with the main frontal band
+coming through later on Monday into Tuesday morning. Behind the
+front, and with the associated upper level low coming through
+northern California, the newly arrived cold pool will allow for a
+chance of isolated to scattered thunderstorms through Tuesday
+afternoon and evening, with probabilities ranging from around 20 to
+30 percent across the region. Lingering showers and chances for
+isolated thunderstorms (up to 15% probability) continue through
+Wednesday, and should move out of the region by Wednesday night.
+Through all of this, high temperatures will dip into the lower to
+middle 60s in the lower elevations to the 50s across the higher
+elevations, and rain totals will range from 0.5-1.5" across the
+interior valleys and most of the Bay Area and Monterey Bay regions,
+to around 1.5-3" in the coastal ranges and the interior mountains of
+the North Bay. This should be mostly beneficial across the region,
+but some minor nuisance flooding is possible in urban and poor
+drainage areas if heavy rain showers or thunderstorms develop.
 
-Post-frontal rain showers and possible thunderstorms (generally less
-than 15%) linger into Wednesday afternoon as a colder air mass
-settles in behind the cold front. Drier conditions look to return to
-the region for the latter half of the week with troughing forecast
-by the clusters."""
+As the frontal system passes, temperatures will warm slightly into a
+rather dry latter part of the week, back to around the seasonal
+averages rather similar to today`s highs. Extended guidance from the
+Climate Prediction Center leans towards temperatures and rain
+totals above seasonal averages for the last week of April."""
 ))
