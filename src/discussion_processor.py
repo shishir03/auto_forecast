@@ -58,7 +58,7 @@ def simplify_discussion(discussion_text):
     return response['message']['content'], end - start
 
 for filename in os.listdir(TRIMMED_DIR):
-    with open(f"{TRIMMED_DIR}/filename", "r") as f:
+    with open(f"{TRIMMED_DIR}/{filename}", "r") as f:
         print(f"Processing discussion {filename}")
         discussion, time_taken = f.read()
         print(f"Processed discussion {filename} in {time_taken} seconds")
