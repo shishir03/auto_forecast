@@ -65,4 +65,4 @@ for filename in os.listdir(TRIMMED_DIR):
     simplified, time_taken = simplify_discussion(discussion)
     print(f"Processed discussion {filename} in {time_taken} seconds")
     with open(f"{OUTPUT_DIR}/{filename}_s", "w") as out_file:
-        out_file.write(discussion)
+        out_file.write(simplified)
