@@ -73,29 +73,29 @@ def get_z500_laplacian(ds_z500):
     plotter.plot_z500_laplacian(ds_z500, z500, laplacian)
     return z500, laplacian
 
-def get_sfc_features(ds_mslp, neighborhood_size=10, min_depth=2.0):
+def get_lows_highs(ds_pressure, var_name="mslp", neighborhood_size=10, min_depth=2.0, low_bound=1013, high_bound=1013):
     """
     Determine high or low pressure centers from an MSLP field
     """
-    lats = ds_mslp["latitude"].values
-    lons = ds_mslp["longitude"].values
+    lats = ds_pressure["latitude"].values
+    lons = ds_pressure["longitude"].values
 
-    mslp_smooth = xr.apply_ufunc(gaussian_filter, ds_mslp["prmsl"], kwargs={"sigma": 3}, dask="parallelized")
+    mslp_smooth = xr.apply_ufunc(gaussian_filter, ds_pressure["prmsl"], kwargs={"sigma": 3}, dask="parallelized")
     mslp_smooth = mslp_smooth.values
     lows = minimum_filter(mslp_smooth, size=neighborhood_size)
     highs = maximum_filter(mslp_smooth, size=neighborhood_size)
     
-    lows_mask = ((mslp_smooth == lows) & (mslp_smooth < 1013) & (mslp_smooth < highs - min_depth))
-    highs_mask = ((mslp_smooth == highs) & (mslp_smooth > 1013) & (mslp_smooth > lows + min_depth))
+    lows_mask = ((mslp_smooth == lows) & (mslp_smooth < low_bound) & (mslp_smooth < highs - min_depth))
+    highs_mask = ((mslp_smooth == highs) & (mslp_smooth > high_bound) & (mslp_smooth > lows + min_depth))
 
     low_indices = np.argwhere(lows_mask)
     high_indices = np.argwhere(highs_mask)
 
-    lows = [{"lat": float(lats[i]), "lon": float(lons[j]), "mslp": float(mslp_smooth[i, j])}
+    lows = [{"lat": float(lats[i]), "lon": float(lons[j]), var_name: float(mslp_smooth[i, j])}
         for i, j in low_indices
     ]
 
-    highs = [{"lat": float(lats[i]), "lon": float(lons[j]), "mslp": float(mslp_smooth[i, j])}
+    highs = [{"lat": float(lats[i]), "lon": float(lons[j]), var_name: float(mslp_smooth[i, j])}
         for i, j in high_indices
     ]
 
@@ -157,27 +157,35 @@ def get_wind_vectors(ds_u, ds_v, jet_threshold=30, spacing_deg=5.0, neighborhood
 
     return vectors
 
-lows, highs = get_sfc_features(ds_mslp)
+lows, highs = get_lows_highs(ds_mslp)
 plotter.plot_contour_field(ds_mslp, var_name="prmsl", lows=lows, highs=highs, title="MSLP Plot", cmap="RdBu_r")
 
 # ds_wind250 = mpcalc.wind_speed(ds_u250["u"].metpy.quantify(), ds_v250["v"].metpy.quantify())
 # vectors = get_wind_vectors(ds_u250, ds_v250, spacing_deg=2.5)
 # plotter.plot_wind_vectors(ds_wind250, ds_u250["latitude"].values, ds_v250["longitude"].values, vectors)
-def features_to_text(sfc_features, tempers, tempers_850mb, vectors_250mb, vectors_850mb, z500_anom):
+def features_to_text(ds_mslp, z500_anom, tempers, tempers_850mb, vectors_250mb, vectors_850mb):
     lines = []
     
-    lows, highs = sfc_features
-    def output_features(features, low_or_high):
+    lows, highs = get_lows_highs(ds_mslp)
+    troughs, ridges = get_lows_highs(z500_anom, var_name="anomaly", neighborhood_size=15, min_depth=20, low_bound=-50, high_bound=50)
+
+    def output_features(features, feature_name, var_name, units):
         for f in features:
             north_south = "N" if f["lat"] >= 0 else "S"
             adjusted_lon = f["lon"] % 180 - 180 * (f["lon"] // 180)
             east_west = "E" if adjusted_lon >= 0 else "W"
-            lines.append(f"Surface {low_or_high} at {(abs(f["lat"])):.1f}{north_south}, {(abs(adjusted_lon)):.1f}{east_west}, "
-                        f"central pressure {f["mslp"]:.0f} hPa")
+            lines.append(f"{feature_name} at {(abs(f["lat"])):.1f}{north_south}, {(abs(adjusted_lon)):.1f}{east_west}, "
+                        f"{var_name}: {f[var_name]:.0f} {units}")
     
-    output_features(lows, "low")
-    output_features(highs, "high")
+    # Surface lows / highs
+    output_features(lows, "surface low", "mslp", "hPa")
+    output_features(highs, "surface high", "mslp", "hPa")
 
+    # Troughs / ridges
+    output_features(troughs, "500mb trough", "anomaly", "m")
+    output_features(ridges, "500mb ridge", "anomaly", "m")
+
+    # Jet streaks
     if not vectors_250mb or len(vectors_250mb) == 0:
         lines.append("No significant jet stream activity")
     else:
