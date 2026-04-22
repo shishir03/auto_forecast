@@ -26,7 +26,7 @@ def download_file(forecast_date, forecast_cycle, forecast_hour, verbose=False):
     model_file = Path(local_file_name)
     if model_file.is_file():
         print("File already found")
-        return
+        return local_file_name
 
     model_file.parent.mkdir(exist_ok=True, parents=True)
     
