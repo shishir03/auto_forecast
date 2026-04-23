@@ -39,20 +39,29 @@ Sunday:
 
 **Actual forecast (simplified)**
 ```
-PATTERN: A high-pressure system continues to dominate the region, leading to unusually warm temperatures. As it slowly weakens, a trough and low pressure system are expected to build into the area from the west.
+PATTERN: A high-pressure system continues to dominate the region, leading to unusually warm 
+temperatures. As it slowly weakens, a trough and low pressure system are expected to build 
+into the area from the west.
 
-IMPACTS: For several days, highs have been record-breaking, but that trend is now slowing down. Temperatures will still be warmer than usual, but not as extreme. Overnight lows will feel slightly more comfortable compared to previous nights. By mid-week, cooler conditions are expected with highs dropping 5-10 degrees. Rain is forecasted to return by mid-week, potentially bringing an end to the heat.
+IMPACTS: For several days, highs have been record-breaking, but that trend is now slowing 
+down. Temperatures will still be warmer than usual, but not as extreme. Overnight lows will 
+feel slightly more comfortable compared to previous nights. By mid-week, cooler conditions 
+are expected with highs dropping 5-10 degrees. Rain is forecasted to return by mid-week, 
+potentially bringing an end to the heat.
 ```
 
 #### April 9, 2026
 
 **Auto-forecast**
 ```
-* Friday – The low pressure system will track southeastward across the region, leading to an increase in precipitation on Saturday.
+* Friday – The low pressure system will track southeastward across the region, leading to 
+an increase in precipitation on Saturday.
 
-* Saturday – The low pressure system will move southeastward, bringing a change in precipitation from rain to snow.
+* Saturday – The low pressure system will move southeastward, bringing a change in 
+precipitation from rain to snow.
 
-* Sunday – The precipitation will shift to the northwest, leading to a return to rain on Monday.
+* Sunday – The precipitation will shift to the northwest, leading to a return to rain on 
+Monday.
 
 * Monday – The storm will be on the move, but it will be slow-moving and less severe.
 
@@ -60,24 +69,35 @@ IMPACTS: For several days, highs have been record-breaking, but that trend is no
 
 * Wednesday – A gradual transition to more moderate weather will take place.
 
-* Thursday – The storm will begin to weaken, but there will be a chance of brief heavy rain and gusty winds.
+* Thursday – The storm will begin to weaken, but there will be a chance of brief heavy 
+rain and gusty winds.
 
 * Friday – The storm will continue to weaken, leading to a return to normal weather conditions.
 ```
 
 **Actual forecast**
 ```
-PATTERN: A cold front will move into the area on Saturday afternoon and evening, bringing rain showers and thunderstorms with it. Behind this system, a low-pressure area will linger, leading to scattered rain showers and thunderstorms. By Sunday, the system will continue to produce wraparound rain showers and thunderstorms.
+PATTERN: A cold front will move into the area on Saturday afternoon and evening, bringing 
+rain showers and thunderstorms with it. Behind this system, a low-pressure area will linger, 
+leading to scattered rain showers and thunderstorms. By Sunday, the system will continue 
+to produce wraparound rain showers and thunderstorms.
 
-IMPACTS: Rain showers and thunderstorms will move into the area on Saturday morning, bringing the risk of lightning, heavy rainfall, strong winds, and small hail. The rain is expected to be beneficial due to the dry March conditions. As the system moves through, widespread rainfall is expected across the region. On Sunday, wraparound rain showers and thunderstorms will continue, with a chance of snow at higher elevations. By Monday, temperatures are expected to drop below normal, but will rebound to seasonal norms by Thursday.
+IMPACTS: Rain showers and thunderstorms will move into the area on Saturday morning, 
+bringing the risk of lightning, heavy rainfall, strong winds, and small hail. The rain is 
+expected to be beneficial due to the dry March conditions. As the system moves through, 
+widespread rainfall is expected across the region. On Sunday, wraparound rain showers and 
+thunderstorms will continue, with a chance of snow at higher elevations. By Monday, 
+temperatures are expected to drop below normal, but will rebound to seasonal norms by Thursday.
 ```
 
 #### April 18, 2026
 
 **Auto-forecast**
 ```
-Temperature trend: The trend is gradually warmer with an increase in average temperature across the country.
-Precipitation trend: Precipitation is expected to be above normal across most of the country, with a slight increase expected in the western parts of the US.
+Temperature trend: The trend is gradually warmer with an increase in average temperature 
+across the country.
+Precipitation trend: Precipitation is expected to be above normal across most of the country, 
+with a slight increase expected in the western parts of the US.
 Wind trend: The winds are expected to be mild with a decrease in the southeastern regions.
 
 ### Potential Impact:
@@ -87,9 +107,17 @@ Wind trend: The winds are expected to be mild with a decrease in the southeaster
 
 **Actual forecast**
 ```
-PATTERN: A high-pressure system is dominating the weather, leading to warm temperatures and increasing moisture from the west.
+PATTERN: A high-pressure system is dominating the weather, leading to warm temperatures 
+and increasing moisture from the west.
 
-IMPACTS: Expect very warm temperatures throughout the weekend, especially inland areas where it may reach into the 80s. However, clouds will return to coastal areas on Sunday due to an approaching low-pressure system. This may cause slight cooling in these regions, particularly in the North Bay and San Francisco Bay Area. Rain showers are expected to begin Monday morning in the North Bay, spreading southward across the Bay Area. While some areas, especially outside of the Central Coast's coastal ranges, may see little rainfall on Monday, thunderstorms with up to 30% chance are possible due to increasing instability.
+IMPACTS: Expect very warm temperatures throughout the weekend, especially inland areas 
+where it may reach into the 80s. However, clouds will return to coastal areas on Sunday 
+due to an approaching low-pressure system. This may cause slight cooling in these regions, 
+particularly in the North Bay and San Francisco Bay Area. Rain showers are expected to 
+begin Monday morning in the North Bay, spreading southward across the Bay Area. While 
+some areas, especially outside of the Central Coast's coastal ranges, may see little 
+rainfall on Monday, thunderstorms with up to 30% chance are possible due to increasing 
+instability.
 ```
 
 ### Future improvements
