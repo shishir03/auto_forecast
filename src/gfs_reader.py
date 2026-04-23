@@ -77,8 +77,10 @@ def open_xr(filter, filename=model_filename, grid=0):
     return xr.open_dataset(filename, engine="cfgrib", filter_by_keys=filter, decode_timedelta=True) \
         .sel(latitude=slice(lat_max, lat_min), longitude=slice(lon_min, lon_max))
 
-def read_grids(filename=model_filename):
+def read_grids(date=sample_date, cycle=sample_cycle, hr=sample_hr):
     # Big grids
+    filename = download_file(date, cycle, hr)
+
     ds_z500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "gh"}, filename=filename)
     ds_mslp = open_xr({"shortName": "prmsl"}, filename=filename) / 100
     ds_u250 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 250, "shortName": "u"}, filename=filename)
@@ -105,7 +107,7 @@ def read_grids(filename=model_filename):
         lat=slice(lat_max, lat_min), 
         lon=slice(lon_min, lon_max),
         level=500.0,
-        time=f"0001-{sample_date[4:6]}-01 00:00:00"         # Get climatology for the right month
+        time=f"0001-{date[4:6]}-01 00:00:00"         # Get climatology for the right month
     ).squeeze("time").interp(lat=ds_z500["latitude"], lon=ds_z500["longitude"])
 
     # 500 mb height anomalies

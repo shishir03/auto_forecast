@@ -6,7 +6,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter, minimum_filter, maximum_filter
 
 import plotter
-from gfs_reader import read_grids
+from gfs_reader import read_grids, sample_date, sample_cycle, sample_hr
 # plotter.plot_500mb_field(z500_anom, title="500mb Geopotential Height")
 
 # plotter.plot_contour_field(ds_z500, var_name="gh", title="500mb Geopotential Height")
@@ -116,7 +116,9 @@ def get_wind_vectors(ds_u, ds_v, jet_threshold=30, spacing_deg=5.0, neighborhood
 # ds_wind250 = mpcalc.wind_speed(ds_u250["u"].metpy.quantify(), ds_v250["v"].metpy.quantify())
 # vectors = get_wind_vectors(ds_u250, ds_v250, spacing_deg=2.5)
 # plotter.plot_wind_vectors(ds_wind250, ds_u250["latitude"].values, ds_v250["longitude"].values, vectors)
-def features_to_text(ds_mslp, z500_anom, ds_u250, ds_v250):
+def features_to_text(date, cycle, hr):
+    ds_mslp, z500_anom, ds_u250, ds_v250 = read_grids(date, cycle, hr)
+
     lines = []
     
     lows, highs = get_lows_highs(ds_mslp, field="prmsl")
@@ -157,5 +159,4 @@ def features_to_text(ds_mslp, z500_anom, ds_u250, ds_v250):
     return "\n".join(lines)
 
 if __name__ == "__main__":
-    ds_mslp, z500_anom, ds_u250, ds_v250 = read_grids()
-    print(features_to_text(ds_mslp, z500_anom, ds_u250, ds_v250))
+    print(features_to_text(sample_date, sample_cycle, sample_hr))
