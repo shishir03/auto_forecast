@@ -47,7 +47,7 @@ def download_file(forecast_date, forecast_cycle, forecast_hour, verbose=False):
                 for obj in response['Contents']:
                     print(obj['Key'])
         else:
-            print("No objects found in the folder.")
+            print(f"No objects found in folder {folder}")
     except Exception as e:
         print(f"Error accessing S3: {e}")
 
@@ -74,7 +74,7 @@ grid_sizes = [(10, 60, 180, 260), (25, 50, 225, 255), (36, 38.5, 236, 239)]
 
 def open_xr(filter, filename=model_filename, grid=0):
     lat_min, lat_max, lon_min, lon_max = grid_sizes[grid]
-    return xr.open_dataset(filename, engine="cfgrib", filter_by_keys=filter) \
+    return xr.open_dataset(filename, engine="cfgrib", filter_by_keys=filter, decode_timedelta=True) \
         .sel(latitude=slice(lat_max, lat_min), longitude=slice(lon_min, lon_max))
 
 def read_grids(filename=model_filename):
@@ -101,7 +101,7 @@ def read_grids(filename=model_filename):
     ds_prate = open_xr({"shortName": "prate", "stepType": "avg"}, filename=filename, grid=2)
 
     lat_min, lat_max, lon_min, lon_max = grid_sizes[0]
-    z500_climo = xr.open_dataset(f"{MODEL_DIR}/hgt.mon.ltm.1991-2020.nc").sel(
+    z500_climo = xr.open_dataset(f"{MODEL_DIR}/hgt.mon.ltm.1991-2020.nc", use_cftime=True).sel(
         lat=slice(lat_max, lat_min), 
         lon=slice(lon_min, lon_max),
         level=500.0,

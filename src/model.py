@@ -17,13 +17,13 @@ def get_example(discussion: str):
     datetime = discussion.split("_")[1]
     date = datetime[:8]
     time = datetime[-4:]
-    cycle = ((int(time) // 6) * 6 - 6) % 24
+    cycle = f"{(((int(time) // 6) * 6 - 6) % 24):02}"
 
     model_file = download_file(date, cycle, "006")
     ds_mslp, z500_anom, ds_u250, ds_v250 = read_grids(model_file)
     model_features = features_to_text(ds_mslp, z500_anom, ds_u250, ds_v250)
 
-    with open(discussion, "r") as f:
+    with open(f"{OUTPUT_DIR}/{discussion}", "r") as f:
         contents = f.read()
 
     return {"features_text": model_features, "simplified": contents}

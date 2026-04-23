@@ -58,15 +58,16 @@ def simplify_discussion(discussion_text):
     # print(f"Total time: {end - start}")
     return response['message']['content'], (end - start)
 
-for filename in os.listdir(TRIMMED_DIR):
-    print(f"Processing discussion {filename}")
-    with open(f"{TRIMMED_DIR}/{filename}", "r") as f:
-        discussion = f.read()
+if __name__ == "__main__":
+    for filename in os.listdir(TRIMMED_DIR):
+        print(f"Processing discussion {filename}")
+        with open(f"{TRIMMED_DIR}/{filename}", "r") as f:
+            discussion = f.read()
 
-    simplified, time_taken = simplify_discussion(discussion)
-    print(f"Processed discussion {filename} in {time_taken} seconds")
+        simplified, time_taken = simplify_discussion(discussion)
+        print(f"Processed discussion {filename} in {time_taken} seconds")
 
-    out_filename = Path(f"{OUTPUT_DIR}/{filename}_s")
-    out_filename.parent.mkdir(exist_ok=True, parents=True)
-    with open(out_filename, "w") as out_file:
-        out_file.write(simplified)
+        out_filename = Path(f"{OUTPUT_DIR}/{filename}_s")
+        out_filename.parent.mkdir(exist_ok=True, parents=True)
+        with open(out_filename, "w") as out_file:
+            out_file.write(simplified)

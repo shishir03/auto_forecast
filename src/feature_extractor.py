@@ -156,5 +156,6 @@ def features_to_text(ds_mslp, z500_anom, ds_u250, ds_v250):
     
     return "\n".join(lines)
 
-ds_mslp, z500_anom, ds_u250, ds_v250 = read_grids()
-print(features_to_text(ds_mslp, z500_anom, ds_u250, ds_v250))
+if __name__ == "__main__":
+    ds_mslp, z500_anom, ds_u250, ds_v250 = read_grids()
+    print(features_to_text(ds_mslp, z500_anom, ds_u250, ds_v250))
