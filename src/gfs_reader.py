@@ -1,4 +1,5 @@
 from pathlib import Path
+import requests
 import xarray as xr
 
 import boto3
@@ -56,6 +57,16 @@ def download_file(forecast_date, forecast_cycle, forecast_hour, verbose=False):
     print(f"File {object_key} downloaded successfully.")
     return local_file_name
 
+def download_z500_avgs():
+    if not Path(f"{MODEL_DIR}/hgt.mon.ltm.1991-2020.nc").is_file():
+        print("Downloading z500 averages...")
+        url = "https://downloads.psl.noaa.gov//Datasets/ncep.reanalysis/Monthlies/pressure/hgt.mon.ltm.1991-2020.nc"
+        response = requests.get(url)
+        with open(f"{MODEL_DIR}/hgt.mon.ltm.1991-2020.nc", "wb") as f:
+            f.write(response.content)
+    else:
+        print("z500 averages found")
+
 sample_date = "20260217"
 sample_cycle = "00"
 sample_hr = "012"
@@ -80,12 +91,14 @@ def open_xr(filter, filename=model_filename, grid=0):
 def read_grids(date=sample_date, cycle=sample_cycle, hr=sample_hr):
     # Big grids
     filename = download_file(date, cycle, hr)
+    download_z500_avgs()
 
     ds_z500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "gh"}, filename=filename)
     ds_mslp = open_xr({"shortName": "prmsl"}, filename=filename) / 100
     ds_u250 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 250, "shortName": "u"}, filename=filename)
     ds_v250 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 250, "shortName": "v"}, filename=filename)
 
+    """
     # Medium grids
     ds_u500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "u"}, filename=filename, grid=1)
     ds_v500 = open_xr({"typeOfLevel": "isobaricInhPa", "level": 500, "shortName": "v"}, filename=filename, grid=1)
@@ -101,6 +114,7 @@ def read_grids(date=sample_date, cycle=sample_cycle, hr=sample_hr):
     ds_tsfc = open_xr({"typeOfLevel": "surface", "shortName": "t"}, filename=filename, grid=2)
     ds_cwat = open_xr({"shortName": "cwat"}, filename=filename, grid=2)
     ds_prate = open_xr({"shortName": "prate", "stepType": "avg"}, filename=filename, grid=2)
+    """
 
     lat_min, lat_max, lon_min, lon_max = grid_sizes[0]
     z500_climo = xr.open_dataset(f"{MODEL_DIR}/hgt.mon.ltm.1991-2020.nc", use_cftime=True).sel(
