@@ -40,18 +40,22 @@ def process_zip(start_date=start_date, end_date=end_date):
     with zipfile.ZipFile(filename, "r") as zf:
         for fname in zf.namelist():
             date = fname.split("_")[1][:-4]
-            with zf.open(fname) as f:
-                contents = f.read().decode("utf-8")
-                if not "...New SHORT TERM, LONG TERM" in contents:
-                    # Not an updated discussion
-                    continue
+            out_fname = f"{OUTPUT_DIR}/discussion_{date}"
 
-                sections = contents.split("&&")
-                short_term = sections[1].strip()
-                long_term = sections[2].strip()
-                discussion = "\n\n".join([short_term, long_term])
+            if not Path(out_fname).is_file():
+                with zf.open(fname) as f:
+                    contents = f.read().decode("utf-8")
+                    if not "...New SHORT TERM, LONG TERM" in contents:
+                        # Not an updated discussion
+                        continue
 
-            with open(f"{OUTPUT_DIR}/discussion_{date}", "w") as out_file:
-                out_file.write(discussion)
+                    sections = contents.split("&&")
+                    short_term = sections[1].strip()
+                    long_term = sections[2].strip()
+                    discussion = "\n\n".join([short_term, long_term])
 
-process_zip(start_date, end_date)
+                with open(out_fname, "w") as out_file:
+                    out_file.write(discussion)
+
+if __name__ == "__main__":
+    process_zip(start_date, end_date)
