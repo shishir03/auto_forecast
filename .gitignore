@@ -2,3 +2,4 @@ model_files
 discussions
 forecast_model/checkpoint*
 __pycache__
+venv
