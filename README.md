@@ -1,6 +1,13 @@
 # Auto-forecast
 Trying to train a small language model to generate weather forecasts from model data. The goal is to generate a simplified version of a NWS forecast discussion.
 
+## Installation steps
+
+ - Install `ollama` if you haven't already
+ - Run `discussion_processor.py` to generate the discussion dataset
+ - Make sure to pull the manifest if you get an error (`ollama pull llama3.1:8b-instruct-q4_K_M`)
+ - Run `model.py` to pull the weather model data and to train the language model
+
 ## Progress update (April 23, 2026)
 
 The basic training pipeline is now in place, though it isn't great. Currently, I retrieve discussions using [Iowa State's NWS products archive API](https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?help), and process them using the local LLM Llama 3.1. This is done to convert the more meteorologically detailed forecast discussions into a simpler format that a general audience can understand. On my hardware (CPU only), each discussion takes around five minutes, so I did this test run with only around 37 discussions (took around three hours). For now, I'm only working with discussions specifically for the San Francisco Bay Area.
