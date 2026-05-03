@@ -4,3 +4,5 @@ forecast_model/checkpoint*
 venv
 .env
 __pycache__
+venv
+.env

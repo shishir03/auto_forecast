@@ -21,7 +21,7 @@ def get_example(discussion: str):
     datetime = discussion.split("_")[1]
     date = datetime[:8]
     time = datetime[-4:]
-    cycle = f"{(((int(time) // 6) * 6 - 6) % 24):02}"
+    cycle = f"{(((int(time) // 6) * 6 - 6) % 24):02}"       # Get the most recent model cycle before discussion
 
     model_features = features_to_text(date, cycle, "006")
 
