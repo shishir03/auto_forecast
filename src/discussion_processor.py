@@ -1,4 +1,6 @@
 import os
+import multiprocessing as mp
+from functools import partial
 import time
 from pathlib import Path
 
@@ -8,10 +10,9 @@ DISCUSSION_DIR = "discussions"
 TRIMMED_DIR = f"{DISCUSSION_DIR}/trimmed"
 OUTPUT_DIR = f"{DISCUSSION_DIR}/out"
 
-def simplify_discussion(discussion_text):
-    start = time.time()
+def simplify_discussion(discussion_text, model="llama3.1:8b-instruct-q4_K_M"):
     extraction_response = ollama.chat(
-        model='llama3.1:8b-instruct-q4_K_M',
+        model=model,
         messages=[
             {
                 'role': 'system',
@@ -28,10 +29,10 @@ def simplify_discussion(discussion_text):
         ]
     )
     extracted_claims = extraction_response['message']['content']
-    print(f"{extracted_claims}\n")
+    # print(f"{extracted_claims}\n")
 
     response = ollama.chat(
-        model='llama3.1:8b-instruct-q4_K_M',
+        model=model,
         messages=[
             {
                 'role': 'system',
@@ -54,20 +55,33 @@ def simplify_discussion(discussion_text):
         ]
     )
 
-    end = time.time()
     # print(f"Total time: {end - start}")
-    return response['message']['content'], (end - start)
+    return response['message']['content']
 
-if __name__ == "__main__":
-    for filename in os.listdir(TRIMMED_DIR):
+def worker_process(discussion_chunk, model="llama3.1:8b-instruct-q4_K_M"):
+    for filename in discussion_chunk:
         print(f"Processing discussion {filename}")
         with open(f"{TRIMMED_DIR}/{filename}", "r") as f:
             discussion = f.read()
 
-        simplified, time_taken = simplify_discussion(discussion)
-        print(f"Processed discussion {filename} in {time_taken} seconds")
+        try:
+            result = simplify_discussion(discussion, model)
+            out_filename = Path(f"{OUTPUT_DIR}/{filename}_s")
+            out_filename.parent.mkdir(exist_ok=True, parents=True)
+            with open(out_filename, "w") as out_file:
+                out_file.write(result)
+        except Exception as e:
+            print(f"Encountered the following exception when processing discussion {filename}: {e} ")
 
-        out_filename = Path(f"{OUTPUT_DIR}/{filename}_s")
-        out_filename.parent.mkdir(exist_ok=True, parents=True)
-        with open(out_filename, "w") as out_file:
-            out_file.write(simplified)
+if __name__ == "__main__":
+    n_workers = max(1, mp.cpu_count() - 1)
+    discussion_filenames = os.listdir(TRIMMED_DIR)
+    chunks = [discussion_filenames[i::n_workers] for i in range(n_workers)]
+    worker_fn = partial(worker_process)
+
+    start = time.time()
+    with mp.Pool(processes=n_workers) as pool:
+        pool.map(worker_fn, chunks)
+    end = time.time()
+
+    print(f"Processed discussions in {end - start} seconds ({(end - start) / len(discussion_filenames)} seconds per discussion)")
