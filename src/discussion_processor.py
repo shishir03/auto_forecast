@@ -1,4 +1,5 @@
 import os
+import re
 import multiprocessing as mp
 import psutil
 import subprocess
@@ -68,6 +69,29 @@ def simplify_discussion(llm, discussion_text):
     # print(f"Total time: {end - start}")
     return response['choices'][0]['message']['content']
 
+def validate_output(text):
+    errors = []
+
+    for section in ('PATTERN', 'IMPACTS', 'CONFIDENCE'):
+        count = len(re.findall(rf'^{section}:', text, re.MULTILINE))
+        if count == 0:
+            errors.append(f"missing {section} section")
+        elif count > 1:
+            errors.append(f"multiple {section} sections ({count}) — output may contain more than one summary")
+
+    if not errors:
+        pattern_pos = text.index('PATTERN:')
+        impacts_pos = text.index('IMPACTS:')
+        confidence_pos = text.index('CONFIDENCE:')
+        if not (pattern_pos < impacts_pos < confidence_pos):
+            errors.append("sections out of order (expected PATTERN → IMPACTS → CONFIDENCE)")
+
+        match = re.search(r'^CONFIDENCE:\s*(\w+)', text, re.MULTILINE)
+        if match and match.group(1).lower() not in ('low', 'medium', 'high'):
+            errors.append(f"invalid CONFIDENCE value '{match.group(1)}' (expected Low, Medium, or High)")
+
+    return errors
+
 def worker_process(discussion_chunk, model_path=MODEL_PATH, n_threads=1, n_gpu_layers=0):
     llm = Llama(model_path=model_path, n_threads=n_threads, n_gpu_layers=n_gpu_layers, n_ctx=8192, verbose=False)
     for filename in discussion_chunk:
@@ -77,6 +101,9 @@ def worker_process(discussion_chunk, model_path=MODEL_PATH, n_threads=1, n_gpu_l
 
         try:
             result = simplify_discussion(llm, discussion)
+            errors = validate_output(result)
+            if errors:
+                print(f"Warning: output for {filename} failed validation: {'; '.join(errors)}")
             out_filename = Path(f"{OUTPUT_DIR}/{filename}_s")
             out_filename.parent.mkdir(exist_ok=True, parents=True)
             with open(out_filename, "w") as out_file:
