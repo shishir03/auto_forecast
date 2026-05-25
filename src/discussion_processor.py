@@ -1,6 +1,7 @@
 import os
 import multiprocessing as mp
 import psutil
+import subprocess
 from functools import partial
 import time
 from pathlib import Path
@@ -14,6 +15,12 @@ TRIMMED_DIR = f"{DISCUSSION_DIR}/trimmed"
 OUTPUT_DIR = f"{DISCUSSION_DIR}/out"
 
 MODEL_PATH = "llama/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+
+def has_gpu():
+    try:
+        return subprocess.run(['nvidia-smi'], capture_output=True).returncode == 0
+    except FileNotFoundError:
+        return False
 
 def simplify_discussion(llm, discussion_text):
     extraction_response = llm.create_chat_completion(
@@ -61,8 +68,8 @@ def simplify_discussion(llm, discussion_text):
     # print(f"Total time: {end - start}")
     return response['choices'][0]['message']['content']
 
-def worker_process(discussion_chunk, model_path=MODEL_PATH, n_threads=1):
-    llm = Llama(model_path=model_path, n_threads=n_threads, n_ctx=8192, verbose=False)
+def worker_process(discussion_chunk, model_path=MODEL_PATH, n_threads=1, n_gpu_layers=0):
+    llm = Llama(model_path=model_path, n_threads=n_threads, n_gpu_layers=n_gpu_layers, n_ctx=8192, verbose=False)
     for filename in discussion_chunk:
         print(f"Processing discussion {filename}")
         with open(f"{TRIMMED_DIR}/{filename}", "r") as f:
@@ -80,16 +87,21 @@ def worker_process(discussion_chunk, model_path=MODEL_PATH, n_threads=1):
 if __name__ == "__main__":
     process_zip("2026-04-01T00:00Z", "2026-04-30T23:59Z")
 
-    n_physical_cores = psutil.cpu_count(logical=False)
-    n_workers = max(1, n_physical_cores - 1)
-    n_threads = max(1, n_physical_cores // n_workers)
     discussion_filenames = os.listdir(TRIMMED_DIR)
-    chunks = [discussion_filenames[i::n_workers] for i in range(n_workers)]
-    worker_fn = partial(worker_process, model_path=MODEL_PATH, n_threads=n_threads)
-
     start = time.time()
-    with mp.Pool(processes=n_workers) as pool:
-        pool.map(worker_fn, chunks)
-    end = time.time()
 
+    if has_gpu():
+        print("GPU detected — using sequential processing")
+        worker_process(discussion_filenames, model_path=MODEL_PATH, n_gpu_layers=-1)
+    else:
+        print("No GPU detected — using multiprocessing")
+        n_physical_cores = psutil.cpu_count(logical=False)
+        n_workers = max(1, n_physical_cores - 1)
+        n_threads = max(1, n_physical_cores // n_workers)
+        chunks = [discussion_filenames[i::n_workers] for i in range(n_workers)]
+        worker_fn = partial(worker_process, model_path=MODEL_PATH, n_threads=n_threads)
+        with mp.Pool(processes=n_workers) as pool:
+            pool.map(worker_fn, chunks)
+
+    end = time.time()
     print(f"Processed discussions in {end - start} seconds ({(end - start) / len(discussion_filenames)} seconds per discussion)")
