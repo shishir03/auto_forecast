@@ -3,9 +3,12 @@ Trying to train a small language model to generate weather forecasts from model 
 
 ## Installation steps
 
- - Install `ollama` if you haven't already
+ - Install the meta-llama model:
+```
+pip install -U "huggingface_hub[cli]"
+hf download bartowski/Meta-Llama-3.1-8B-Instruct-GGUF --include "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf" --local-dir ./llama
+```
  - Run `discussion_processor.py` to generate the discussion dataset
- - Make sure to pull the manifest if you get an error (`ollama pull llama3.1:8b-instruct-q4_K_M`)
  - Run `model.py` to pull the weather model data and to train the language model
 
 ## Progress update (April 23, 2026)
